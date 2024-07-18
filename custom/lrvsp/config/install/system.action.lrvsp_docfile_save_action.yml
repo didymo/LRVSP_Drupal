@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - lrvsp
+id: lrvsp_docfile_save_action
+label: 'Save docfiles'
+type: lrvsp_docfile
+plugin: entity:save_action:lrvsp_docfile
+configuration: {  }

@@ -1,0 +1,5 @@
+name: 'LRVSP'
+type: module
+description: 'A module to represent relationships between documents'
+package: LRVSP
+core_version_requirement: ^10 || ^11

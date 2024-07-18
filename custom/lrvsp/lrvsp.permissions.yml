@@ -1,0 +1,35 @@
+administer lrvsp_docfile:
+  title: 'Administer docfiles'
+  restrict access: true
+view lrvsp_docfile:
+  title: 'View docfile'
+edit lrvsp_docfile:
+  title: 'Edit docfile'
+delete lrvsp_docfile:
+  title: 'Delete docfile'
+create lrvsp_docfile:
+  title: 'Create docfile'
+
+administer lrvsp_doc:
+  title: 'Administer docs'
+  restrict access: true
+view lrvsp_doc:
+  title: 'View doc'
+edit lrvsp_doc:
+  title: 'Edit doc'
+delete lrvsp_doc:
+  title: 'Delete doc'
+create lrvsp_doc:
+  title: 'Create doc'
+
+administer lrvsp_link:
+  title: 'Administer links'
+  restrict access: true
+view lrvsp_link:
+  title: 'View link'
+edit lrvsp_link:
+  title: 'Edit link'
+delete lrvsp_link:
+  title: 'Delete link'
+create lrvsp_link:
+  title: 'Create link'

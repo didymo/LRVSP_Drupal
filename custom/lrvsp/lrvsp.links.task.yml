@@ -1,0 +1,68 @@
+entity.lrvsp_docfile.settings:
+  title: 'Settings'
+  route_name: entity.lrvsp_docfile.settings
+  base_route: entity.lrvsp_docfile.settings
+entity.lrvsp_docfile.view:
+  title: 'View'
+  route_name: entity.lrvsp_docfile.canonical
+  base_route: entity.lrvsp_docfile.canonical
+entity.lrvsp_docfile.edit_form:
+  title: 'Edit'
+  route_name: entity.lrvsp_docfile.edit_form
+  base_route: entity.lrvsp_docfile.canonical
+entity.lrvsp_docfile.delete_form:
+  title: 'Delete'
+  route_name: entity.lrvsp_docfile.delete_form
+  base_route: entity.lrvsp_docfile.canonical
+  weight: 10
+entity.lrvsp_docfile.collection:
+  title: 'DocFiles'
+  route_name: entity.lrvsp_docfile.collection
+  base_route: system.admin_content
+  weight: 10
+
+entity.lrvsp_doc.settings:
+  title: 'Settings'
+  route_name: entity.lrvsp_doc.settings
+  base_route: entity.lrvsp_doc.settings
+entity.lrvsp_doc.view:
+  title: 'View'
+  route_name: entity.lrvsp_doc.canonical
+  base_route: entity.lrvsp_doc.canonical
+entity.lrvsp_doc.edit_form:
+  title: 'Edit'
+  route_name: entity.lrvsp_doc.edit_form
+  base_route: entity.lrvsp_doc.canonical
+entity.lrvsp_doc.delete_form:
+  title: 'Delete'
+  route_name: entity.lrvsp_doc.delete_form
+  base_route: entity.lrvsp_doc.canonical
+  weight: 10
+entity.lrvsp_doc.collection:
+  title: 'Docs'
+  route_name: entity.lrvsp_doc.collection
+  base_route: system.admin_content
+  weight: 10
+
+entity.lrvsp_link.settings:
+  title: 'Settings'
+  route_name: entity.lrvsp_link.settings
+  base_route: entity.lrvsp_link.settings
+entity.lrvsp_link.view:
+  title: 'View'
+  route_name: entity.lrvsp_link.canonical
+  base_route: entity.lrvsp_link.canonical
+entity.lrvsp_link.edit_form:
+  title: 'Edit'
+  route_name: entity.lrvsp_link.edit_form
+  base_route: entity.lrvsp_link.canonical
+entity.lrvsp_link.delete_form:
+  title: 'Delete'
+  route_name: entity.lrvsp_link.delete_form
+  base_route: entity.lrvsp_link.canonical
+  weight: 10
+entity.lrvsp_link.collection:
+  title: 'Links'
+  route_name: entity.lrvsp_link.collection
+  base_route: system.admin_content
+  weight: 10

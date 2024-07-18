@@ -12,8 +12,12 @@
     "require": {
         "composer/installers": "^2.1",
         "cweagans/composer-patches": "^1.7",
+        "drupal/consumers": "^1.17",
         "drupal/core-composer-scaffold": "^10.2.0",
         "drupal/core-recommended": "^10.2.0",
+        "drupal/jsonapi_extras": "^3.25",
+        "drupal/restui": "^1.21",
+        "drupal/simple_oauth": "^5.2",
         "drush/drush": "^12.4.3",
         "oomphinc/composer-installers-extender": "^2.0",
         "vlucas/phpdotenv": "^5.1",

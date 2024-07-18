@@ -1,0 +1,40 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the LRVSP module.
+ */
+
+use Drupal\Core\Database\Database;
+use Drupal\taxonomy\Entity\Term;
+use Drupal\taxonomy\Entity\Vocabulary;
+
+/**
+ * Implements hook_module_preinstall().
+ */
+function lrvsp_module_preinstall() {
+  // Create status vocabulary.
+  $vocabulary = Vocabulary::create([
+    'vid' => 'lrvsp_status',
+    'name' => 'Status',
+    'description' => 'The processing status of an uploaded file.',
+  ]);
+  $vocabulary->save();
+  // add terms
+  Term::create([
+    'vid' => $vocabulary->id(),
+    'name' => 'Processing',
+  ])->save();
+  Term::create([
+    'vid' => $vocabulary->id(),
+    'name' => 'Processed',
+  ])->save();
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function lrvsp_uninstall() {
+  // delete vocab
+  Vocabulary::load('lrvsp_status')->delete();
+}

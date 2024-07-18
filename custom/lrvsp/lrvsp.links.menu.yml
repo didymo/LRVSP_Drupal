@@ -1,0 +1,35 @@
+entity.lrvsp_docfile.settings:
+  title: 'DocFile'
+  description: 'Configure a DocFile entity type.'
+  route_name:  entity.lrvsp_docfile.settings
+  parent: system.admin_structure
+
+entity.lrvsp_docfile.collection:
+  title: 'DocFiles'
+  description: 'List of docfiles.'
+  route_name: entity.lrvsp_docfile.collection
+  parent: system.admin_content
+
+entity.lrvsp_doc.settings:
+  title: 'Doc'
+  description: 'Configure a Doc entity type.'
+  route_name:  entity.lrvsp_doc.settings
+  parent: system.admin_structure
+
+entity.lrvsp_doc.collection:
+  title: 'Docs'
+  description: 'List of docs.'
+  route_name: entity.lrvsp_doc.collection
+  parent: system.admin_content
+
+entity.lrvsp_link.settings:
+  title: 'Link'
+  description: 'Configure a Link entity type.'
+  route_name:  entity.lrvsp_link.settings
+  parent: system.admin_structure
+
+entity.lrvsp_link.collection:
+  title: 'Links'
+  description: 'List of links.'
+  route_name: entity.lrvsp_link.collection
+  parent: system.admin_content
