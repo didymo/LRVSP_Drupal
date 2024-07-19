@@ -231,10 +231,32 @@ final class Doc extends ContentEntityBase implements DocInterface {
     return intval($this->get('numLinks')->value);
   }
 
-  public function setLinksProcessed(){
+  public function setLinksProcessed(): void{
     // set this documents links as processed
     $docFileId = $this->get('docFile')->getValue()[0]['target_id'];
     DocFile::load($docFileId)->setLinksProcessed()->save();
+  }
+
+  public function getIsTracked(): bool {
+    // does this Doc have a docFile attached to it?
+    if ($this->hasField('docFile') && !$this->get('docFile')->isEmpty()){
+      return true;
+    }
+    return false;
+  }
+
+  public function getDocFileId(): string{
+    return $this->get('docFile')->getValue()[0]['target_id'];
+  }
+
+  public function getMetadata(): string{
+    if ($this->hasField('metadata')){
+      $val = $this->get('metadata');
+      if (!$val->isEmpty()){
+        return $val->value;
+      }
+    }
+    return '';
   }
 
 }

@@ -281,4 +281,16 @@ final class DocFile extends ContentEntityBase implements DocFileInterface {
     return $this;
   }
 
+  public function getProcessingStatus(): array{
+    return array(
+      'doc' => $this->get('docStatus')->getValue()[0]['target_id'],
+      'links' => $this->get('linksStatus')->getValue()[0]['target_id']
+    );
+  }
+
+  public function getFileUrl(): string{
+    $fid = $this->get('pdf')->get(0)->getValue()['target_id'];
+    return File::Load($fid)->createFileUrl();
+  }
+
 }

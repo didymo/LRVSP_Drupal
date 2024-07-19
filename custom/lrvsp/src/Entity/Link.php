@@ -89,11 +89,10 @@ final class Link extends ContentEntityBase implements LinkInterface {
     parent::postSave($storage, $update);
 
     $fromDocId = $this->get('fromDoc')->getValue()[0]['target_id'];
-    $nodeStorage = \Drupal::entityTypeManager()->getStorage('lrvsp_link');
-    $linkIds = $nodeStorage->getQuery()
+    $linkIds = \Drupal::entityQuery('lrvsp_link')
       ->condition('status', 1)
       ->condition('fromDoc', $fromDocId)
-      ->accessCheck(FALSE)
+      ->accessCheck(FALSE) // TODO decide whether this is correct
       ->execute();
     $fromDocDoc = Doc::load($fromDocId);
     if (sizeof($linkIds) == $fromDocDoc->getNumLinks()){
@@ -226,6 +225,14 @@ final class Link extends ContentEntityBase implements LinkInterface {
       ->setDescription(t('The time that the link was last edited.'));
 
     return $fields;
+  }
+
+  public function getFromDocID(): string{
+    return $this->get('fromDoc')->getValue()[0]['target_id'];
+  }
+
+  public function getToDocID(): string{
+    return $this->get('toDoc')->getValue()[0]['target_id'];
   }
 
 }

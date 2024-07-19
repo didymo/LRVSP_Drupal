@@ -5,7 +5,6 @@
  * Install, update and uninstall functions for the LRVSP module.
  */
 
-use Drupal\Core\Database\Database;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
 
@@ -36,5 +35,5 @@ function lrvsp_module_preinstall() {
  */
 function lrvsp_uninstall() {
   // delete vocab
-  Vocabulary::load('lrvsp_status')->delete();
+  Vocabulary::load('lrvsp_status')?->delete();
 }
