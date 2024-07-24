@@ -5,6 +5,7 @@
  * Install, update and uninstall functions for the LRVSP module.
  */
 
+use Drupal\Core\Database\Database;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
 
@@ -28,6 +29,19 @@ function lrvsp_module_preinstall() {
     'vid' => $vocabulary->id(),
     'name' => 'Processed',
   ])->save();
+}
+
+/**
+ * Implements hook_install()
+ */
+function lrvsp_install() {
+  // clear existing python database
+  $pyDbConn = Database::getConnection('default','python');
+  $transaction = $pyDbConn->startTransaction();
+  $pyDbConn->delete("LinkObjs")->execute();
+  $pyDbConn->delete("DocObjs")->execute();
+  $pyDbConn->delete("FilePaths")->execute();
+  unset($transaction);
 }
 
 /**

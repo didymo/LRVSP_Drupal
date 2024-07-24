@@ -94,12 +94,15 @@ final class Link extends ContentEntityBase implements LinkInterface {
       ->condition('fromDoc', $fromDocId)
       ->accessCheck(FALSE) // TODO decide whether this is correct
       ->execute();
-    $fromDocDoc = Doc::load($fromDocId);
-    if (sizeof($linkIds) == $fromDocDoc->getNumLinks()){
-      $fromDocDoc->setLinksProcessed();
-    } elseif (sizeof($linkIds) > $fromDocDoc->getNumLinks()){
-      $fromDocDoc->setLinksProcessed(); // set processed anyway
-      \Drupal::logger('lrvsp')->error("To many links processed for document.\nExpected number: ".$fromDocDoc->getNumLinks()."\nActual number: ".sizeof($linkIds));
+    $fromDoc = Doc::load($fromDocId);
+    if ($fromDoc->getNumLinks() > -1){
+      if (sizeof($linkIds) == $fromDoc->getNumLinks()){
+        $fromDoc->setLinksProcessed();
+      } elseif (sizeof($linkIds) > $fromDoc->getNumLinks()){
+        $fromDoc->setLinksProcessed(); // set processed anyway
+        \Drupal::logger('lrvsp')->error("To many links processed for document.\nExpected number: ".$fromDoc->getNumLinks()."\nActual number: ".sizeof($linkIds));
+      }
+
     }
   }
 
@@ -113,7 +116,7 @@ final class Link extends ContentEntityBase implements LinkInterface {
     $fields['label'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Label'))
       ->setRequired(TRUE)
-      ->setSetting('max_length', 255)
+      ->setSetting('max_length', 511)
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayOptions('view', [
         'label' => 'hidden',

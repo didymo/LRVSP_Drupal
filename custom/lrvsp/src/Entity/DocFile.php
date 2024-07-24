@@ -82,10 +82,7 @@ final class DocFile extends ContentEntityBase implements DocFileInterface {
     }
   }
 
-  /**
-   *  {@inheritdoc}
-   */
-  public function postSave(EntityStorageInterface $storage, $update = TRUE) {
+  public function postSave(EntityStorageInterface $storage, $update = TRUE){
     parent::postSave($storage, $update);
 
     // get saved path of document
@@ -94,21 +91,27 @@ final class DocFile extends ContentEntityBase implements DocFileInterface {
     $stream_wrapper_manager = \Drupal::service('stream_wrapper_manager')->getViaUri($uri);
     $file_path = $stream_wrapper_manager->realpath();
 
-    // add pdf file path to pythonconn database
-    $pyDbConn = Database::getConnection('default','python');
-    $pyDbConn->insert('FilePaths')
-      ->fields(['path','entityId'])
-      ->values([
-        'path' => $file_path,
-        'entityId' => $this->id()
-      ])
-      ->execute();
+    // add pdf file path to pythonconn database (only do this once)
+    if (!$this->get('python')->value){
+      $pyDbConn = Database::getConnection('default','python');
+      $transaction = $pyDbConn->startTransaction();
+      $pyDbConn->insert('FilePaths')
+        ->fields(['path','entityId'])
+        ->values([
+          'path' => $file_path,
+          'entityId' => $this->id()
+        ])
+        ->execute();
+      unset($transaction); // commit
+      $this->set('python', TRUE)->save();
+    }
   }
 
   /**
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type): array {
+    // get term
     $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')
       ->loadByProperties([
         'vid' => 'lrvsp_status',
@@ -252,6 +255,13 @@ final class DocFile extends ContentEntityBase implements DocFileInterface {
     $fields['changed'] = BaseFieldDefinition::create('changed')
       ->setLabel(t('Changed'))
       ->setDescription(t('The time that the docfile was last edited.'));
+
+    $fields['python'] = BaseFieldDefinition::create('boolean')
+      ->setLabel(t('python'))
+      ->setDescription(t('has this entity been sent to python?'))
+      ->setDefaultValue(FALSE)
+      ->setDisplayConfigurable('form', FALSE)
+      ->setDisplayConfigurable('view', FALSE);
 
     return $fields;
   }

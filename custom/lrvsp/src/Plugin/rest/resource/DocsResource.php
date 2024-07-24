@@ -101,6 +101,9 @@ final class DocsResource extends ResourceBase {
       ->condition('linksStatus', $term->id())
       ->accessCheck(FALSE) // TODO decide whether this is correct
       ->execute();
+    if (empty($docFileIds)){
+      $docFileIds = [];
+    }
     // get ids of all docs that link to the selected docFile ids
     $docIds = \Drupal::entityQuery('lrvsp_doc')
       ->condition('status', 1)

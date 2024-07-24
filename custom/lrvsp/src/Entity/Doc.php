@@ -81,8 +81,10 @@ final class Doc extends ContentEntityBase implements DocInterface {
     parent::postSave($storage, $update);
 
     // set this document as processed
-    $docFileId = $this->get('docFile')->getValue()[0]['target_id'];
-    DocFile::load($docFileId)->setDocProcessed()->save();
+    $docFile = $this->get('docFile')->getValue();
+    if ($this->hasField('docFile') && !$this->get('docFile')->isEmpty()){
+      DocFile::load($docFile[0]['target_id'])->setDocProcessed()->save();
+    }
   }
 
   /**
@@ -149,7 +151,6 @@ final class Doc extends ContentEntityBase implements DocInterface {
     $fields['docFile'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('DocFile'))
       ->setSetting('target_type', 'lrvsp_docfile')
-      ->setRequired(TRUE)
       ->setDisplayOptions('form', [
         'type' => 'entity_reference_autocomplete',
         'settings' => [
@@ -257,6 +258,21 @@ final class Doc extends ContentEntityBase implements DocInterface {
       }
     }
     return '';
+  }
+
+  public function setMetadata(string $metadata): Doc{
+    $this->set('metadata',$metadata);
+    return $this;
+  }
+
+  public function setDocFile(int $docFileId): Doc{
+    $this->set('docFile',['target_id'=>$docFileId]);
+    return $this;
+  }
+
+  public function setNumLinks(int $numLinks): Doc{
+    $this->set('numLinks', $numLinks);
+    return $this;
   }
 
 }
