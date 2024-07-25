@@ -1,0 +1,32 @@
+entity.lrvsp_docfile.edit_form:
+  route_name: entity.lrvsp_docfile.edit_form
+  group: lrvsp_docfile
+  title: 'Edit'
+
+entity.lrvsp_docfile.delete_form:
+  route_name: entity.lrvsp_docfile.delete_form
+  group: lrvsp_docfile
+  title: 'Delete'
+  weight: 10
+
+entity.lrvsp_doc.edit_form:
+  route_name: entity.lrvsp_doc.edit_form
+  group: lrvsp_doc
+  title: 'Edit'
+
+entity.lrvsp_doc.delete_form:
+  route_name: entity.lrvsp_doc.delete_form
+  group: lrvsp_doc
+  title: 'Delete'
+  weight: 10
+
+entity.lrvsp_link.edit_form:
+  route_name: entity.lrvsp_link.edit_form
+  group: lrvsp_link
+  title: 'Edit'
+
+entity.lrvsp_link.delete_form:
+  route_name: entity.lrvsp_link.delete_form
+  group: lrvsp_link
+  title: 'Delete'
+  weight: 10

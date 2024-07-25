@@ -1,0 +1,17 @@
+lrvsp_docfile.add_form:
+  title: 'Add docfile'
+  route_name: entity.lrvsp_docfile.add_form
+  appears_on:
+    - entity.lrvsp_docfile.collection
+
+lrvsp_doc.add_form:
+  title: 'Add doc'
+  route_name: entity.lrvsp_doc.add_form
+  appears_on:
+    - entity.lrvsp_doc.collection
+
+lrvsp_link.add_form:
+  title: 'Add link'
+  route_name: entity.lrvsp_link.add_form
+  appears_on:
+    - entity.lrvsp_link.collection

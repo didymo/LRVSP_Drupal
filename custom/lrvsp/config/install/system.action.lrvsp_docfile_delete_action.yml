@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - lrvsp
+id: lrvsp_docfile_delete_action
+label: 'Delete docfiles'
+type: lrvsp_docfile
+plugin: entity:delete_action:lrvsp_docfile
+configuration: {  }

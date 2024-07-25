@@ -1,0 +1,177 @@
+<?php
+
+/**
+ * @file
+ * Primary module hooks for LRVSP module.
+ */
+
+use Drupal\Core\Render\Element;
+use Drupal\user\UserInterface;
+
+/**
+ * Implements hook_theme().
+ */
+function lrvsp_theme(): array {
+  return [
+    'lrvsp_docfile' => ['render element' => 'elements'],
+    'lrvsp_doc' => ['render element' => 'elements'],
+    'lrvsp_link' => ['render element' => 'elements'],
+  ];
+}
+
+/**
+ * Prepares variables for docfile templates.
+ *
+ * Default template: lrvsp-docfile.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - elements: An associative array containing the docfile information and any
+ *     fields attached to the entity.
+ *   - attributes: HTML attributes for the containing element.
+ */
+function template_preprocess_lrvsp_docfile(array &$variables): void {
+  $variables['view_mode'] = $variables['elements']['#view_mode'];
+  foreach (Element::children($variables['elements']) as $key) {
+    $variables['content'][$key] = $variables['elements'][$key];
+  }
+}
+
+/**
+ * Prepares variables for doc templates.
+ *
+ * Default template: lrvsp-doc.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - elements: An associative array containing the doc information and any
+ *     fields attached to the entity.
+ *   - attributes: HTML attributes for the containing element.
+ */
+function template_preprocess_lrvsp_doc(array &$variables): void {
+  $variables['view_mode'] = $variables['elements']['#view_mode'];
+  foreach (Element::children($variables['elements']) as $key) {
+    $variables['content'][$key] = $variables['elements'][$key];
+  }
+}
+
+/**
+ * Prepares variables for link templates.
+ *
+ * Default template: lrvsp-link.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - elements: An associative array containing the link information and any
+ *     fields attached to the entity.
+ *   - attributes: HTML attributes for the containing element.
+ */
+function template_preprocess_lrvsp_link(array &$variables): void {
+  $variables['view_mode'] = $variables['elements']['#view_mode'];
+  foreach (Element::children($variables['elements']) as $key) {
+    $variables['content'][$key] = $variables['elements'][$key];
+  }
+}
+
+/**
+ * Implements hook_user_cancel().
+ */
+function lrvsp_user_cancel($edit, UserInterface $account, $method): void {
+  switch ($method) {
+    case 'user_cancel_block_unpublish':
+      // Unpublish docfiles.
+      $storage = \Drupal::entityTypeManager()->getStorage('lrvsp_docfile');
+      $lrvsp_docfile_ids = $storage->getQuery()
+        ->condition('uid', $account->id())
+        ->condition('status', 1)
+        ->accessCheck(FALSE)
+        ->execute();
+      foreach ($storage->loadMultiple($lrvsp_docfile_ids) as $lrvsp_docfile) {
+        $lrvsp_docfile->set('status', FALSE)->save();
+      }
+      // Unpublish docs.
+      $storage = \Drupal::entityTypeManager()->getStorage('lrvsp_doc');
+      $lrvsp_doc_ids = $storage->getQuery()
+        ->condition('uid', $account->id())
+        ->condition('status', 1)
+        ->accessCheck(FALSE)
+        ->execute();
+      foreach ($storage->loadMultiple($lrvsp_doc_ids) as $lrvsp_doc) {
+        $lrvsp_doc->set('status', FALSE)->save();
+      }
+      // Unpublish links.
+      $storage = \Drupal::entityTypeManager()->getStorage('lrvsp_link');
+      $lrvsp_link_ids = $storage->getQuery()
+        ->condition('uid', $account->id())
+        ->condition('status', 1)
+        ->accessCheck(FALSE)
+        ->execute();
+      foreach ($storage->loadMultiple($lrvsp_link_ids) as $lrvsp_link) {
+        $lrvsp_link->set('status', FALSE)->save();
+      }
+      break;
+
+    case 'user_cancel_reassign':
+      // Anonymize docfiles.
+      $storage = \Drupal::entityTypeManager()->getStorage('lrvsp_docfile');
+      $lrvsp_docfile_ids = $storage->getQuery()
+        ->condition('uid', $account->id())
+        ->accessCheck(FALSE)
+        ->execute();
+      foreach ($storage->loadMultiple($lrvsp_docfile_ids) as $lrvsp_docfile) {
+        $lrvsp_docfile->setOwnerId(0)->save();
+      }
+      // Anonymize docs.
+      $storage = \Drupal::entityTypeManager()->getStorage('lrvsp_doc');
+      $lrvsp_doc_ids = $storage->getQuery()
+        ->condition('uid', $account->id())
+        ->accessCheck(FALSE)
+        ->execute();
+      foreach ($storage->loadMultiple($lrvsp_doc_ids) as $lrvsp_doc) {
+        $lrvsp_doc->setOwnerId(0)->save();
+      }
+      // Anonymize links.
+      $storage = \Drupal::entityTypeManager()->getStorage('lrvsp_link');
+      $lrvsp_link_ids = $storage->getQuery()
+        ->condition('uid', $account->id())
+        ->accessCheck(FALSE)
+        ->execute();
+      foreach ($storage->loadMultiple($lrvsp_link_ids) as $lrvsp_link) {
+        $lrvsp_link->setOwnerId(0)->save();
+      }
+      break;
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_predelete() for user entities.
+ */
+function lrvsp_user_predelete(UserInterface $account): void {
+  // Delete docfiles that belong to this account.
+  $storage = \Drupal::entityTypeManager()->getStorage('lrvsp_docfile');
+  $lrvsp_docfile_ids = $storage->getQuery()
+    ->condition('uid', $account->id())
+    ->accessCheck(FALSE)
+    ->execute();
+  $storage->delete(
+    $storage->loadMultiple($lrvsp_docfile_ids)
+  );
+  // Delete docs that belong to this account.
+  $storage = \Drupal::entityTypeManager()->getStorage('lrvsp_doc');
+  $lrvsp_doc_ids = $storage->getQuery()
+    ->condition('uid', $account->id())
+    ->accessCheck(FALSE)
+    ->execute();
+  $storage->delete(
+    $storage->loadMultiple($lrvsp_doc_ids)
+  );
+  // Delete links that belong to this account.
+  $storage = \Drupal::entityTypeManager()->getStorage('lrvsp_link');
+  $lrvsp_link_ids = $storage->getQuery()
+    ->condition('uid', $account->id())
+    ->accessCheck(FALSE)
+    ->execute();
+  $storage->delete(
+    $storage->loadMultiple($lrvsp_link_ids)
+  );
+}

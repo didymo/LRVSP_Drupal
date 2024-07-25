@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - lrvsp
+id: lrvsp_link_delete_action
+label: 'Delete links'
+type: lrvsp_link
+plugin: entity:delete_action:lrvsp_link
+configuration: {  }

@@ -1,0 +1,23 @@
+entity.lrvsp_docfile.settings:
+  path: 'admin/structure/lrvsp-docfile'
+  defaults:
+    _form: '\Drupal\lrvsp\Form\DocFileSettingsForm'
+    _title: 'DocFile'
+  requirements:
+    _permission: 'administer lrvsp_docfile'
+
+entity.lrvsp_doc.settings:
+  path: 'admin/structure/lrvsp-doc'
+  defaults:
+    _form: '\Drupal\lrvsp\Form\DocSettingsForm'
+    _title: 'Doc'
+  requirements:
+    _permission: 'administer lrvsp_doc'
+
+entity.lrvsp_link.settings:
+  path: 'admin/structure/lrvsp-link'
+  defaults:
+    _form: '\Drupal\lrvsp\Form\LinkSettingsForm'
+    _title: 'Link'
+  requirements:
+    _permission: 'administer lrvsp_link'

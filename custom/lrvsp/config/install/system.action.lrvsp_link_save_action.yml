@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - lrvsp
+id: lrvsp_link_save_action
+label: 'Save links'
+type: lrvsp_link
+plugin: entity:save_action:lrvsp_link
+configuration: {  }
