@@ -241,7 +241,20 @@ final class Doc extends ContentEntityBase implements DocInterface {
   public function getIsTracked(): bool {
     // does this Doc have a docFile attached to it?
     if ($this->hasField('docFile') && !$this->get('docFile')->isEmpty()){
-      return true;
+      $fileId = $this->get('docFile')->getValue()[0]['target_id'];
+      $docFile = DocFile::load($fileId);
+      // get current processing status and one to compare it to
+      $status = $docFile->getProcessingStatus();
+      $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')
+        ->loadByProperties([
+          'vid' => 'lrvsp_status',
+          'name' => 'Processed',
+        ]);
+      $term = reset($terms);
+      // processed = both doc and links are marked as processed
+      if ($status['doc'] == $status['links'] && $status['links'] == $term->id()){
+        return true;
+      }
     }
     return false;
   }

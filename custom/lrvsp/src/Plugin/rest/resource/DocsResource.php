@@ -87,37 +87,14 @@ final class DocsResource extends ResourceBase {
    * Responds to GET requests.
    */
   public function get(): ResourceResponse {
-    // get term for comparison
-    $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')
-    ->loadByProperties([
-      'vid' => 'lrvsp_status',
-      'name' => 'Processed',
-    ]);
-    $term = reset($terms);
-    // get ids of all docfiles that are fully processed
-    $docFileIds = \Drupal::entityQuery('lrvsp_docfile')
-      ->condition('status', 1)
-      ->condition('docStatus', $term->id())
-      ->condition('linksStatus', $term->id())
-      ->accessCheck(FALSE) // TODO decide whether this is correct
-      ->execute();
-    if (empty($docFileIds)){
-      $docFileIds = [];
-    }
-    // get ids of all docs that link to the selected docFile ids
-    $docIds = \Drupal::entityQuery('lrvsp_doc')
-      ->condition('status', 1)
-      ->condition('docFile', $docFileIds, 'IN')
-      ->accessCheck(FALSE) // TODO decide whether this is correct
-      ->execute();
-    // load selected docs
-    $docs = Doc::loadMultiple($docIds);
+    $docs = Doc::loadMultiple();
     $docList = array();
     // extract required data
     foreach ($docs as $doc){
       if ($doc instanceof Doc){
         $retDoc['id'] = $doc->id();
         $retDoc['title'] = $doc->getTitle();
+        $retDoc['tracked'] = $doc->getIsTracked();
 
         $docList[] = $retDoc;
         unset($retDoc);

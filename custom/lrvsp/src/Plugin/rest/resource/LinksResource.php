@@ -106,13 +106,6 @@ final class LinksResource extends ResourceBase {
     // extract required data
     foreach ($links as $link){
       if ($link instanceof Link){
-        // extract doc data
-        $doc = Doc::load($link->getToDocID());
-        $retDoc['id'] = $doc->id();
-        $retDoc['title'] = $doc->getTitle();
-        $retDoc['tracked'] = $doc->getIsTracked();
-        $docList[] = $retDoc;
-
         // extract link data
         $retLink['fromDoc'] = $link->getFromDocID();
         $retLink['toDoc'] = $link->getToDocID();
@@ -126,10 +119,7 @@ final class LinksResource extends ResourceBase {
     $docList = array_unique($docList, SORT_REGULAR);
     $linkList = array_unique($linkList, SORT_REGULAR);
     // create response
-    $response = new ResourceResponse(array(
-      'docs' => $docList,
-      'links' => $linkList,
-    ));
+    $response = new ResourceResponse($linkList);
     // set cache stuff
     $metadata = new CacheableMetadata();
     $metadata->setCacheMaxAge(0); // TODO replace with tags
