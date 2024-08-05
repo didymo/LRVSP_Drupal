@@ -10,7 +10,33 @@ use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
 
 /**
- * Implements hook_module_preinstall().
+ * Implements hook_requirements()
+ */
+function lrvsp_requirements($phase) {
+  $requirements = [];
+
+  // Check the database connection
+  $requirements['requirement_python_database'] = [
+    'title' => t('Python Database Connection'),
+    'value' => t('Connected'),
+    'severity' => REQUIREMENT_OK,
+  ];
+
+  try {
+    // Attempt to get a connection to the 'python' database.
+    Database::getConnection('default', 'python');
+  } catch (\Exception $e) {
+    // no database found, set requirement error
+    $requirements['requirement_python_database']['value'] = t('Not connected');
+    $requirements['requirement_python_database']['description'] = t('The connection to the python database could not be established. Please check your database settings.');
+    $requirements['requirement_python_database']['severity'] = REQUIREMENT_ERROR;
+  }
+
+  return $requirements;
+}
+
+/**
+ * Implements hook_module_preinstall()
  */
 function lrvsp_module_preinstall() {
   // Create status vocabulary.
