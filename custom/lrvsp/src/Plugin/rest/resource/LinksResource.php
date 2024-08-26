@@ -21,7 +21,7 @@ use Symfony\Component\Routing\Route;
  *
  * @RestResource (
  *   id = "lrvsp_links",
- *   label = @Translation("Get all links from a Doc"),
+ *   label = @Translation("[LRVSP] Get all links from a Doc"),
  *   uri_paths = {
  *     "canonical" = "/links/{docId}"
  *   }

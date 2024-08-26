@@ -20,7 +20,7 @@ use Symfony\Component\Routing\Route;
  *
  * @RestResource (
  *   id = "lrvsp_details",
- *   label = @Translation("Get the details of a Doc"),
+ *   label = @Translation("[LRVSP] Get the details of a Doc"),
  *   uri_paths = {
  *     "canonical" = "/details/{docId}"
  *   }

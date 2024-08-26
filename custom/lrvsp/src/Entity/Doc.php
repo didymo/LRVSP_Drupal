@@ -85,6 +85,22 @@ final class Doc extends ContentEntityBase implements DocInterface {
     if ($this->hasField('docFile') && !$this->get('docFile')->isEmpty()){
       DocFile::load($docFile[0]['target_id'])->setDocProcessed()->save();
     }
+
+    // check if all links have already been processed
+    $linkIds = \Drupal::entityQuery('lrvsp_link')
+      ->condition('status', 1)
+      ->condition('fromDoc', $this->id())
+      ->accessCheck(FALSE) // TODO decide whether this is correct
+      ->execute();
+    if ($this->getNumLinks() > -1){
+      if (sizeof($linkIds) == $this->getNumLinks()){
+        $this->setLinksProcessed();
+      } elseif (sizeof($linkIds) > $this->getNumLinks()){
+        $this->setLinksProcessed(); // set processed anyway
+        \Drupal::logger('lrvsp')->error("To many links processed for document.\nExpected number: ".$this->getNumLinks()."\nActual number: ".sizeof($linkIds));
+      }
+
+    }
   }
 
   /**

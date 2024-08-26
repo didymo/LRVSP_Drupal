@@ -158,7 +158,7 @@ final class DocFile extends ContentEntityBase implements DocFileInterface {
       ->setLabel(t('The pdf file for this document'))
       ->setRequired(TRUE)
       ->setSettings([
-        'file_extensions' =>'pdf',
+        'file_extensions' =>'pdf, xml',
         'file_directory' => 'pdfs'
       ])
       ->setDisplayOptions('form', [
@@ -267,7 +267,6 @@ final class DocFile extends ContentEntityBase implements DocFileInterface {
   }
 
   public function setDocProcessed(): DocFileInterface{
-    \Drupal::logger('lrvsp')->notice("setting processed");
     // mark this document as being processed
     $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')
     ->loadByProperties([
@@ -285,6 +284,30 @@ final class DocFile extends ContentEntityBase implements DocFileInterface {
       ->loadByProperties([
         'vid' => 'lrvsp_status',
         'name' => 'Processed',
+      ]);
+    $term = reset($terms);
+    $this->set('linksStatus',['target_id' => $term->id()]);
+    return $this;
+  }
+
+  public function setDocFailed(): DocFileInterface{
+    // mark this document as being failed
+    $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')
+      ->loadByProperties([
+        'vid' => 'lrvsp_status',
+        'name' => 'Failed',
+      ]);
+    $term = reset($terms);
+    $this->set('docStatus',['target_id' => $term->id()]);
+    return $this;
+  }
+
+  public function setLinksFailed(): DocFileInterface{
+    // mark this documents links as being failed
+    $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')
+      ->loadByProperties([
+        'vid' => 'lrvsp_status',
+        'name' => 'Failed',
       ]);
     $term = reset($terms);
     $this->set('linksStatus',['target_id' => $term->id()]);

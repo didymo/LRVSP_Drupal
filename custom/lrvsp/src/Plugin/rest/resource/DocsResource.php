@@ -19,7 +19,7 @@ use Symfony\Component\Routing\Route;
  *
  * @RestResource (
  *   id = "lrvsp_docs",
- *   label = @Translation("Get all processed docs"),
+ *   label = @Translation("[LRVSP] Get all processed docs"),
  *   uri_paths = {
  *     "canonical" = "/docs"
  *   }

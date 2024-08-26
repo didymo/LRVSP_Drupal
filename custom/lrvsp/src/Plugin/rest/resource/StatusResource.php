@@ -9,6 +9,7 @@ use Drupal\Core\KeyValueStore\KeyValueStoreInterface;
 use Drupal\lrvsp\Entity\DocFile;
 use Drupal\rest\Plugin\ResourceBase;
 use Drupal\rest\ResourceResponse;
+use Drupal\taxonomy\Entity\Term;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -19,7 +20,7 @@ use Symfony\Component\Routing\Route;
  *
  * @RestResource (
  *   id = "lrvsp_status",
- *   label = @Translation("Get DocFile Processing status"),
+ *   label = @Translation("[LRVSP] Get DocFile Processing status"),
  *   uri_paths = {
  *     "canonical" = "/status/{fileId}"
  *   }
@@ -94,19 +95,12 @@ final class StatusResource extends ResourceBase {
     }
     // get current processing status and one to compare it to
     $status = $docFile->getProcessingStatus();
-    $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')
-      ->loadByProperties([
-        'vid' => 'lrvsp_status',
-        'name' => 'Processed',
-      ]);
-    $term = reset($terms);
-    // processed = both doc and links are marked as processed
-    if ($status['doc'] == $status['links'] && $status['links'] == $term->id()){
-      $value = 'Processed';
-    } else {
-      $value = 'Processing';
-    }
-    $response = new ResourceResponse(array('status' => $value));
+    $docsTerm = Term::load($status['doc'])->getName();
+    $linksTerm = Term::load($status['links'])->getName();
+    $response = new ResourceResponse(array(
+      'doc' => $docsTerm,
+      'link' => $linksTerm
+    ));
     $response->addCacheableDependency($docFile);
     return $response;
   }

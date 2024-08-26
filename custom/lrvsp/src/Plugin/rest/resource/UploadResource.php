@@ -20,7 +20,7 @@ use Symfony\Component\Routing\Route;
  *
  * @RestResource (
  *   id = "lrvsp_upload",
- *   label = @Translation("Upload pdf for DocFile"),
+ *   label = @Translation("[LRVSP] Upload pdf for DocFile"),
  *   uri_paths = {
  *     "create" = "/upload"
  *   }
