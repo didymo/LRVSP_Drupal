@@ -184,7 +184,7 @@ final class LrvspCommands extends DrushCommands {
           }
         }
         // mark link as failed in db
-        $pyDbConn->update('DocObjs')
+        $pyDbConn->update('LinkObjs')
           ->fields([
             'failed' => 1
           ])

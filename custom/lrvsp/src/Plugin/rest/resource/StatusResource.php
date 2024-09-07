@@ -12,8 +12,10 @@ use Drupal\rest\ResourceResponse;
 use Drupal\taxonomy\Entity\Term;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Route;
+use Drupal\Core\Session\AccountProxyInterface;
 
 /**
  * Represents status records as resources.
@@ -65,9 +67,11 @@ final class StatusResource extends ResourceBase {
     array $serializer_formats,
     LoggerInterface $logger,
     KeyValueFactoryInterface $keyValueFactory,
+    AccountProxyInterface    $currentUser,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $serializer_formats, $logger);
     $this->storage = $keyValueFactory->get('lrvsp_status');
+    $this->currentUser = $currentUser;
   }
 
   /**
@@ -80,7 +84,8 @@ final class StatusResource extends ResourceBase {
       $plugin_definition,
       $container->getParameter('serializer.formats'),
       $container->get('logger.factory')->get('rest'),
-      $container->get('keyvalue')
+      $container->get('keyvalue'),
+      $container->get('current_user')
     );
   }
 
@@ -88,6 +93,11 @@ final class StatusResource extends ResourceBase {
    * Responds to GET requests.
    */
   public function get($fileId): ResourceResponse {
+    // check user permissions
+    if (!$this->currentUser->hasPermission('access content')) {
+      throw new AccessDeniedHttpException();
+    }
+
     // check docFile exists
     $docFile = DocFile::load($fileId);
     if (!isset($docFile)) {

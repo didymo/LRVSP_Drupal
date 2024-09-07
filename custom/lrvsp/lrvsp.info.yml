@@ -5,3 +5,4 @@ package: LRVSP
 core_version_requirement: ^10 || ^11
 dependencies:
   - drupal:restui
+  - drupal:simple_oauth
