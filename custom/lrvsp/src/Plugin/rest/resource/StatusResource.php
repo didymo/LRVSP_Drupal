@@ -9,17 +9,20 @@ use Drupal\Core\KeyValueStore\KeyValueStoreInterface;
 use Drupal\lrvsp\Entity\DocFile;
 use Drupal\rest\Plugin\ResourceBase;
 use Drupal\rest\ResourceResponse;
+use Drupal\taxonomy\Entity\Term;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Route;
+use Drupal\Core\Session\AccountProxyInterface;
 
 /**
  * Represents status records as resources.
  *
  * @RestResource (
  *   id = "lrvsp_status",
- *   label = @Translation("Get DocFile Processing status"),
+ *   label = @Translation("[LRVSP] Get DocFile Processing status"),
  *   uri_paths = {
  *     "canonical" = "/status/{fileId}"
  *   }
@@ -64,9 +67,11 @@ final class StatusResource extends ResourceBase {
     array $serializer_formats,
     LoggerInterface $logger,
     KeyValueFactoryInterface $keyValueFactory,
+    AccountProxyInterface    $currentUser,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $serializer_formats, $logger);
     $this->storage = $keyValueFactory->get('lrvsp_status');
+    $this->currentUser = $currentUser;
   }
 
   /**
@@ -79,7 +84,8 @@ final class StatusResource extends ResourceBase {
       $plugin_definition,
       $container->getParameter('serializer.formats'),
       $container->get('logger.factory')->get('rest'),
-      $container->get('keyvalue')
+      $container->get('keyvalue'),
+      $container->get('current_user')
     );
   }
 
@@ -87,6 +93,11 @@ final class StatusResource extends ResourceBase {
    * Responds to GET requests.
    */
   public function get($fileId): ResourceResponse {
+    // check user permissions
+    if (!$this->currentUser->hasPermission('access content')) {
+      throw new AccessDeniedHttpException();
+    }
+
     // check docFile exists
     $docFile = DocFile::load($fileId);
     if (!isset($docFile)) {
@@ -94,19 +105,12 @@ final class StatusResource extends ResourceBase {
     }
     // get current processing status and one to compare it to
     $status = $docFile->getProcessingStatus();
-    $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')
-      ->loadByProperties([
-        'vid' => 'lrvsp_status',
-        'name' => 'Processed',
-      ]);
-    $term = reset($terms);
-    // processed = both doc and links are marked as processed
-    if ($status['doc'] == $status['links'] && $status['links'] == $term->id()){
-      $value = 'Processed';
-    } else {
-      $value = 'Processing';
-    }
-    $response = new ResourceResponse(array('status' => $value));
+    $docsTerm = Term::load($status['doc'])->getName();
+    $linksTerm = Term::load($status['links'])->getName();
+    $response = new ResourceResponse(array(
+      'doc' => $docsTerm,
+      'link' => $linksTerm
+    ));
     $response->addCacheableDependency($docFile);
     return $response;
   }

@@ -12,17 +12,20 @@ use Drupal\rest\Plugin\ResourceBase;
 use finfo;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Route;
+use Drupal\Core\Session\AccountProxyInterface;
 
 /**
  * Represents upload records as resources.
  *
  * @RestResource (
- *   id = "lrvsp_upload",
- *   label = @Translation("Upload pdf for DocFile"),
+ *   id = "lrvsp_create",
+ *   label = @Translation("[LRVSP] Create DocFile"),
  *   uri_paths = {
- *     "create" = "/upload"
+ *     "create" = "/create"
  *   }
  * )
  *
@@ -48,7 +51,7 @@ use Symfony\Component\Routing\Route;
  * Drupal core.
  * @see \Drupal\rest\Plugin\rest\resource\EntityResource
  */
-final class UploadResource extends ResourceBase {
+final class CreateResource extends ResourceBase {
 
   /**
    * The key-value storage.
@@ -65,9 +68,11 @@ final class UploadResource extends ResourceBase {
     array $serializer_formats,
     LoggerInterface $logger,
     KeyValueFactoryInterface $keyValueFactory,
+    AccountProxyInterface    $currentUser,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $serializer_formats, $logger);
     $this->storage = $keyValueFactory->get('lrvsp_upload');
+    $this->currentUser = $currentUser;
   }
 
   /**
@@ -80,7 +85,8 @@ final class UploadResource extends ResourceBase {
       $plugin_definition,
       $container->getParameter('serializer.formats'),
       $container->get('logger.factory')->get('rest'),
-      $container->get('keyvalue')
+      $container->get('keyvalue'),
+      $container->get('current_user')
     );
   }
 
@@ -88,6 +94,16 @@ final class UploadResource extends ResourceBase {
    * Responds to POST requests and saves the new record.
    */
   public function post(array $data): ModifiedResourceResponse {
+    // check user permissions
+    if (!$this->currentUser->hasPermission('access content')) {
+      throw new AccessDeniedHttpException();
+    }
+
+    // Validate required fields.
+    if (empty($data['fileId'])) {
+      throw new BadRequestHttpException('Missing required fields');
+    }
+
     // get term to set
     $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')
       ->loadByProperties([
@@ -96,20 +112,9 @@ final class UploadResource extends ResourceBase {
       ]);
     $term = reset($terms);
 
-    // decode file data
-    $fileData = base64_decode($data['pdf'], True);
-    // check a pdf was actually provided
-    $fInfo = new finfo(FILEINFO_MIME);
-    $fType = $fInfo->buffer($fileData);
-    $fGood = $fType === "application/pdf; charset=binary";
-    if (!$fGood){
-      throw new HttpException(415, "Non PDF provided");
-    }
-    // save the pdf
-    $file = \Drupal::service('file.repository')->writeData($fileData, 'public://pdfs/'.$data['fileName']);
     // create the doc entity
     $entity = DocFile::create([
-      'pdf' => ['target_id' => $file->id()],
+      'file' => ['target_id' => $data['fileId']],
       'docStatus' => ['target_id' => $term->id()],
       'linksStatus' => ['target_id' => $term->id()],
     ]);

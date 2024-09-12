@@ -55,6 +55,10 @@ function lrvsp_module_preinstall() {
     'vid' => $vocabulary->id(),
     'name' => 'Processed',
   ])->save();
+  Term::create([
+    'vid' => $vocabulary->id(),
+    'name' => 'Failed',
+  ])->save();
 }
 
 /**

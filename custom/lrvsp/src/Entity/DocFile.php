@@ -10,6 +10,7 @@ use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\File\FileSystemInterface;
 use Drupal\file\Entity\File;
 use Drupal\lrvsp\DocFileInterface;
 use Drupal\user\EntityOwnerTrait;
@@ -72,7 +73,7 @@ final class DocFile extends ContentEntityBase implements DocFileInterface {
     parent::preSave($storage);
 
     // set label to file name
-    $fid = $this->get('pdf')->get(0)->getValue()['target_id'];
+    $fid = $this->get('file')->get(0)->getValue()['target_id'];
     $fileName = File::Load($fid)->getFilename();
     $this->set('label',$fileName);
 
@@ -86,12 +87,12 @@ final class DocFile extends ContentEntityBase implements DocFileInterface {
     parent::postSave($storage, $update);
 
     // get saved path of document
-    $fid = $this->get('pdf')->get(0)->getValue()['target_id'];
+    $fid = $this->get('file')->get(0)->getValue()['target_id'];
     $uri = File::Load($fid)->getFileUri();
     $stream_wrapper_manager = \Drupal::service('stream_wrapper_manager')->getViaUri($uri);
     $file_path = $stream_wrapper_manager->realpath();
 
-    // add pdf file path to pythonconn database (only do this once)
+    // add file path to pythonconn database (only do this once)
     if (!$this->get('python')->value){
       $pyDbConn = Database::getConnection('default','python');
       $transaction = $pyDbConn->startTransaction();
@@ -154,12 +155,13 @@ final class DocFile extends ContentEntityBase implements DocFileInterface {
       ])
       ->setDisplayConfigurable('view', TRUE);
 
-    $fields['pdf'] = BaseFieldDefinition::create('file')
-      ->setLabel(t('The pdf file for this document'))
+    $fields['file'] = BaseFieldDefinition::create('file')
+      ->setLabel(t('The file for this document'))
       ->setRequired(TRUE)
       ->setSettings([
-        'file_extensions' =>'pdf',
-        'file_directory' => 'pdfs'
+        'file_extensions' =>'pdf xml',
+        'file_directory' => 'private://lrvsp_files',
+        'handler' => 'default:file'
       ])
       ->setDisplayOptions('form', [
         'weight' => 10,
@@ -267,7 +269,6 @@ final class DocFile extends ContentEntityBase implements DocFileInterface {
   }
 
   public function setDocProcessed(): DocFileInterface{
-    \Drupal::logger('lrvsp')->notice("setting processed");
     // mark this document as being processed
     $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')
     ->loadByProperties([
@@ -291,6 +292,30 @@ final class DocFile extends ContentEntityBase implements DocFileInterface {
     return $this;
   }
 
+  public function setDocFailed(): DocFileInterface{
+    // mark this document as being failed
+    $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')
+      ->loadByProperties([
+        'vid' => 'lrvsp_status',
+        'name' => 'Failed',
+      ]);
+    $term = reset($terms);
+    $this->set('docStatus',['target_id' => $term->id()]);
+    return $this;
+  }
+
+  public function setLinksFailed(): DocFileInterface{
+    // mark this documents links as being failed
+    $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')
+      ->loadByProperties([
+        'vid' => 'lrvsp_status',
+        'name' => 'Failed',
+      ]);
+    $term = reset($terms);
+    $this->set('linksStatus',['target_id' => $term->id()]);
+    return $this;
+  }
+
   public function getProcessingStatus(): array{
     return array(
       'doc' => $this->get('docStatus')->getValue()[0]['target_id'],
@@ -299,7 +324,7 @@ final class DocFile extends ContentEntityBase implements DocFileInterface {
   }
 
   public function getFileUrl(): string{
-    $fid = $this->get('pdf')->get(0)->getValue()['target_id'];
+    $fid = $this->get('file')->get(0)->getValue()['target_id'];
     return File::Load($fid)->createFileUrl();
   }
 
