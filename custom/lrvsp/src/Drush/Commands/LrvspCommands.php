@@ -143,16 +143,30 @@ final class LrvspCommands extends DrushCommands {
           // already exists, get id
           $toDocId = reset($docId);
         }
-        // create link object
-        $link = Link::create([
-          'fromDoc' => ['target_id' => $fromDocId],
-          'toDoc' => ['target_id' => $toDocId]
-        ]);
+        // check if this link exists already
+        $linkIds = \Drupal::entityQuery('lrvsp_link')
+          ->condition('status', 1)
+          ->condition('fromDoc', $fromDocId)
+          ->condition('toDoc', $toDocId)
+          ->accessCheck(False) // TODO decide if this is correct
+          ->execute();
+        if (empty($linkIds)){
+          // create link object if it doesn't
+          $link = Link::create([
+            'fromDoc' => ['target_id' => $fromDocId],
+            'toDoc' => ['target_id' => $toDocId],
+            'pages' => $res->pages
+          ]);
+        }
         // delete from database
         $pyDbConn->delete('LinkObjs')
           ->condition('ID', $res->ID)
           ->execute();
-        $this->logger()->success("Successfully created link.");
+        if (empty($linkIds)){
+          $this->logger()->success("Successfully created link.");
+        } else {
+          $this->logger()->notice("Link already exists, skipped.");
+        }
       } catch (\Exception $e){
         $this->logger()->error("Error creating new link ".$e->getMessage());
         // undo changes

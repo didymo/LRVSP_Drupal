@@ -187,6 +187,22 @@ final class Link extends ContentEntityBase implements LinkInterface {
       ])
       ->setDisplayConfigurable('view', TRUE);
 
+    $fields['pages'] = BaseFieldDefinition::create('string_long')
+      ->setLabel(t('Pages'))
+      ->setDescription(t('The pages this link occurs on'))
+      ->setDefaultValue('[]')
+      ->setDisplayOptions('form', [
+        'type' => 'text_textarea',
+        'weight' => 10,
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayOptions('view', [
+        'type' => 'text_default',
+        'label' => 'above',
+        'weight' => 10,
+      ])
+      ->setDisplayConfigurable('view', TRUE);
+
     $fields['uid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Author'))
       ->setSetting('target_type', 'user')
@@ -236,6 +252,16 @@ final class Link extends ContentEntityBase implements LinkInterface {
 
   public function getToDocID(): string{
     return $this->get('toDoc')->getValue()[0]['target_id'];
+  }
+
+  public function getPages(): string{
+    if ($this->hasField('pages')){
+      $val = $this->get('pages');
+      if (!$val->isEmpty()){
+        return $val->value;
+      }
+    }
+    return '';
   }
 
 }

@@ -73,7 +73,7 @@ final class DocFile extends ContentEntityBase implements DocFileInterface {
     parent::preSave($storage);
 
     // set label to file name
-    $fid = $this->get('file')->get(0)->getValue()['target_id'];
+    $fid = $this->get('pdf')->get(0)->getValue()['target_id'];
     $fileName = File::Load($fid)->getFilename();
     $this->set('label',$fileName);
 
@@ -86,20 +86,32 @@ final class DocFile extends ContentEntityBase implements DocFileInterface {
   public function postSave(EntityStorageInterface $storage, $update = TRUE){
     parent::postSave($storage, $update);
 
-    // get saved path of document
-    $fid = $this->get('file')->get(0)->getValue()['target_id'];
+    // get saved path of pdf
+    $fid = $this->get('pdf')->get(0)->getValue()['target_id'];
     $uri = File::Load($fid)->getFileUri();
     $stream_wrapper_manager = \Drupal::service('stream_wrapper_manager')->getViaUri($uri);
-    $file_path = $stream_wrapper_manager->realpath();
+    $pdf_path = $stream_wrapper_manager->realpath();
+
+    // get saved path of processing document
+    $process = $this->get('processFile')->get(0);
+    if (isset($process) && !$process){
+      $fid = $process->getValue()['target_id'];
+      $uri = File::Load($fid)->getFileUri();
+      $stream_wrapper_manager = \Drupal::service('stream_wrapper_manager')->getViaUri($uri);
+      $process_path = $stream_wrapper_manager->realpath();
+    } else {
+      $process_path = "";
+    }
 
     // add file path to pythonconn database (only do this once)
     if (!$this->get('python')->value){
       $pyDbConn = Database::getConnection('default','python');
       $transaction = $pyDbConn->startTransaction();
       $pyDbConn->insert('FilePaths')
-        ->fields(['path','entityId'])
+        ->fields(['pdfPath', 'processPath','entityId'])
         ->values([
-          'path' => $file_path,
+          'pdfPath' => $pdf_path,
+          'processPath' => $process_path,
           'entityId' => $this->id()
         ])
         ->execute();
@@ -155,12 +167,30 @@ final class DocFile extends ContentEntityBase implements DocFileInterface {
       ])
       ->setDisplayConfigurable('view', TRUE);
 
-    $fields['file'] = BaseFieldDefinition::create('file')
-      ->setLabel(t('The file for this document'))
+    $fields['pdf'] = BaseFieldDefinition::create('file')
+      ->setLabel(t('The pdf for this document'))
       ->setRequired(TRUE)
       ->setSettings([
-        'file_extensions' =>'pdf xml',
-        'file_directory' => 'private://lrvsp_files',
+        'file_extensions' =>'pdf',
+        'file_directory' => 'lrvsp_files',
+        'handler' => 'default:file'
+      ])
+      ->setDisplayOptions('form', [
+        'weight' => 10,
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayOptions('view', [
+        'type' => 'text_default',
+        'label' => 'above',
+        'weight' => 10,
+      ])
+      ->setDisplayConfigurable('view', TRUE);
+
+    $fields['processFile'] = BaseFieldDefinition::create('file')
+      ->setLabel(t('The file to be used for processing'))
+      ->setSettings([
+        'file_extensions' =>'xml',
+        'file_directory' => 'lrvsp_files',
         'handler' => 'default:file'
       ])
       ->setDisplayOptions('form', [
@@ -324,7 +354,7 @@ final class DocFile extends ContentEntityBase implements DocFileInterface {
   }
 
   public function getFileUrl(): string{
-    $fid = $this->get('file')->get(0)->getValue()['target_id'];
+    $fid = $this->get('pdf')->get(0)->getValue()['target_id'];
     return File::Load($fid)->createFileUrl();
   }
 

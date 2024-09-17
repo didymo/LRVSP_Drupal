@@ -150,7 +150,7 @@ final class Doc extends ContentEntityBase implements DocInterface {
 
     $fields['metadata'] = BaseFieldDefinition::create('string_long')
       ->setLabel(t('Metadata'))
-      ->setDescription(t('The metadata of the document (currently unused)'))
+      ->setDescription(t('The metadata of the document'))
       ->setDefaultValue('')
       ->setDisplayOptions('form', [
         'type' => 'text_textarea',
