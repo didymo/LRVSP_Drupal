@@ -93,14 +93,17 @@ final class DocFile extends ContentEntityBase implements DocFileInterface {
     $pdf_path = $stream_wrapper_manager->realpath();
 
     // get saved path of processing document
+    $process_path = "";
     $process = $this->get('processFile')->get(0);
-    if (isset($process) && !$process){
-      $fid = $process->getValue()['target_id'];
-      $uri = File::Load($fid)->getFileUri();
-      $stream_wrapper_manager = \Drupal::service('stream_wrapper_manager')->getViaUri($uri);
-      $process_path = $stream_wrapper_manager->realpath();
-    } else {
-      $process_path = "";
+    // check if there is a processing file
+    if (isset($process)){
+      $file = File::Load($process->getValue()['target_id']);
+      // ensure the file actually exixts
+      if ($file != null) {
+        $uri = $file->getFileUri();
+        $stream_wrapper_manager = \Drupal::service('stream_wrapper_manager')->getViaUri($uri);
+        $process_path = $stream_wrapper_manager->realpath();
+      }
     }
 
     // add file path to pythonconn database (only do this once)
