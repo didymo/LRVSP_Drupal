@@ -108,6 +108,7 @@ final class LinksResource extends ResourceBase {
         // extract link data
         $retLink['fromDoc'] = $link->getFromDocID();
         $retLink['toDoc'] = $link->getToDocID();
+        $retLink['pages'] = $link->getPages();
         $linkList[] = $retLink;
 
         unset($retLink);

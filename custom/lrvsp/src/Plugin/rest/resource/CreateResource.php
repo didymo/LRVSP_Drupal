@@ -100,7 +100,7 @@ final class CreateResource extends ResourceBase {
     }
 
     // Validate required fields.
-    if (empty($data['fileId'])) {
+    if (empty($data['pdfId'])) {
       throw new BadRequestHttpException('Missing required fields');
     }
 
@@ -112,12 +112,24 @@ final class CreateResource extends ResourceBase {
       ]);
     $term = reset($terms);
 
-    // create the doc entity
-    $entity = DocFile::create([
-      'file' => ['target_id' => $data['fileId']],
-      'docStatus' => ['target_id' => $term->id()],
-      'linksStatus' => ['target_id' => $term->id()],
-    ]);
+    if (empty($data['processId']) || $data['processId'] == -1){
+      \Drupal::logger("lrvsp")->notice("This");
+      // create the doc entity
+      $entity = DocFile::create([
+        'pdf' => ['target_id' => $data['pdfId']],
+        'docStatus' => ['target_id' => $term->id()],
+        'linksStatus' => ['target_id' => $term->id()],
+      ]);
+    } else {
+      \Drupal::logger("lrvsp")->notice("That");
+      // create the doc entity
+      $entity = DocFile::create([
+        'pdf' => ['target_id' => $data['pdfId']],
+        'processFile' => ['target_id' => $data['processId']],
+        'docStatus' => ['target_id' => $term->id()],
+        'linksStatus' => ['target_id' => $term->id()],
+      ]);
+    }
     $entity->save();
     // Return the newly created record in the response body.
     return new ModifiedResourceResponse(array("fileId"=>$entity->id()), 201);
