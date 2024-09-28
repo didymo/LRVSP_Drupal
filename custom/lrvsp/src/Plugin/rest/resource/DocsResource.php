@@ -12,7 +12,9 @@ use Drupal\rest\Plugin\ResourceBase;
 use Drupal\rest\ResourceResponse;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Route;
+use Drupal\Core\Session\AccountProxyInterface;
 
 /**
  * Represents docs records as resources.
@@ -53,6 +55,7 @@ final class DocsResource extends ResourceBase {
    * The key-value storage.
    */
   private readonly KeyValueStoreInterface $storage;
+  private readonly AccountProxyInterface    $currentUser;
 
   /**
    * {@inheritdoc}
@@ -64,9 +67,11 @@ final class DocsResource extends ResourceBase {
     array $serializer_formats,
     LoggerInterface $logger,
     KeyValueFactoryInterface $keyValueFactory,
+    AccountProxyInterface    $currentUser,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $serializer_formats, $logger);
     $this->storage = $keyValueFactory->get('lrvsp_docs');
+    $this->currentUser = $currentUser;
   }
 
   /**
@@ -79,7 +84,8 @@ final class DocsResource extends ResourceBase {
       $plugin_definition,
       $container->getParameter('serializer.formats'),
       $container->get('logger.factory')->get('rest'),
-      $container->get('keyvalue')
+      $container->get('keyvalue'),
+      $container->get('current_user')
     );
   }
 
@@ -87,6 +93,11 @@ final class DocsResource extends ResourceBase {
    * Responds to GET requests.
    */
   public function get(): ResourceResponse {
+    // check user permissions
+    if (!$this->currentUser->hasPermission('access content')) {
+      throw new AccessDeniedHttpException();
+    }
+
     $docs = Doc::loadMultiple();
     $docList = array();
     // extract required data

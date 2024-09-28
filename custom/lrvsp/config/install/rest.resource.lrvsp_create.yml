@@ -1,0 +1,17 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - lrvsp
+    - serialization
+    - simple_oauth
+id: lrvsp_create
+plugin_id: lrvsp_create
+granularity: resource
+configuration:
+  methods:
+    - POST
+  formats:
+    - json
+  authentication:
+    - oauth2

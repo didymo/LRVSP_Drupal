@@ -57,6 +57,7 @@ final class CreateResource extends ResourceBase {
    * The key-value storage.
    */
   private readonly KeyValueStoreInterface $storage;
+  private readonly AccountProxyInterface    $currentUser;
 
   /**
    * {@inheritdoc}

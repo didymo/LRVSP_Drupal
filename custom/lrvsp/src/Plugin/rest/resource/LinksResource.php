@@ -13,8 +13,10 @@ use Drupal\rest\Plugin\ResourceBase;
 use Drupal\rest\ResourceResponse;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Route;
+use Drupal\Core\Session\AccountProxyInterface;
 
 /**
  * Represents links records as resources.
@@ -55,6 +57,7 @@ final class LinksResource extends ResourceBase {
    * The key-value storage.
    */
   private readonly KeyValueStoreInterface $storage;
+  private readonly AccountProxyInterface    $currentUser;
 
   /**
    * {@inheritdoc}
@@ -66,9 +69,11 @@ final class LinksResource extends ResourceBase {
     array $serializer_formats,
     LoggerInterface $logger,
     KeyValueFactoryInterface $keyValueFactory,
+    AccountProxyInterface    $currentUser,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $serializer_formats, $logger);
     $this->storage = $keyValueFactory->get('lrvsp_links');
+    $this->currentUser = $currentUser;
   }
 
   /**
@@ -81,7 +86,8 @@ final class LinksResource extends ResourceBase {
       $plugin_definition,
       $container->getParameter('serializer.formats'),
       $container->get('logger.factory')->get('rest'),
-      $container->get('keyvalue')
+      $container->get('keyvalue'),
+      $container->get('current_user')
     );
   }
 
@@ -89,6 +95,11 @@ final class LinksResource extends ResourceBase {
    * Responds to GET requests.
    */
   public function get($docId): ResourceResponse {
+    // check user permissions
+    if (!$this->currentUser->hasPermission('access content')) {
+      throw new AccessDeniedHttpException();
+    }
+
     // check doc exists
     $doc = Doc::load($docId);
     if (!isset($doc)) {
