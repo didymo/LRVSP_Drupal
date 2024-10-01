@@ -56,6 +56,7 @@ final class StatusResource extends ResourceBase {
    * The key-value storage.
    */
   private readonly KeyValueStoreInterface $storage;
+  private readonly AccountProxyInterface    $currentUser;
 
   /**
    * {@inheritdoc}

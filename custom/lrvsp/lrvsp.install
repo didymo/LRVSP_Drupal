@@ -8,6 +8,8 @@
 use Drupal\Core\Database\Database;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
+use Drupal\user\Entity\Role;
+use Drupal\user\RoleInterface;
 
 /**
  * Implements hook_requirements()
@@ -72,6 +74,56 @@ function lrvsp_install() {
   $pyDbConn->delete("DocObjs")->execute();
   $pyDbConn->delete("FilePaths")->execute();
   unset($transaction);
+
+  // set permissions
+  // rolls
+  $anonymous_role = Role::load(RoleInterface::ANONYMOUS_ID);
+  $authenticated_role = Role::load(RoleInterface::AUTHENTICATED_ID);
+  // permissions
+  $generalRestPermissions = array(
+    "get lrvsp_details",
+    "get lrvsp_docs",
+    "get lrvsp_links"
+  );
+  $restrictedRestPermissions = array(
+    "post lrvsp_create"
+  );
+  $entities = array(
+    "lrvsp_doc",
+    "lrvsp_docfile",
+    "lrvsp_link"
+  );
+
+  // set general access rest endpoints
+  foreach ($generalRestPermissions as $perm){
+    $permission = 'restful '.$perm;
+    $anonymous_role->grantPermission($permission);
+    $authenticated_role->grantPermission($permission);
+  }
+  // set restricted access rest endpoints
+  foreach ($restrictedRestPermissions as $perm){
+    $permission = 'restful '.$perm;
+    $authenticated_role->grantPermission($permission);
+  }
+  // set entity view permissions (general)
+  foreach ($entities as $ent){
+    $permission = 'view '.$ent;
+    $anonymous_role->grantPermission($permission);
+    $authenticated_role->grantPermission($permission);
+  }
+  // set entity create permissions (restricted)
+  foreach ($entities as $ent){
+    $permission = 'create '.$ent;
+    $authenticated_role->grantPermission($permission);
+    $permission = 'edit '.$ent;
+    $authenticated_role->grantPermission($permission);
+  }
+
+  $anonymous_role->calculateDependencies();
+  $authenticated_role->calculateDependencies();
+
+  $anonymous_role->save();
+  $authenticated_role->save();
 }
 
 /**
