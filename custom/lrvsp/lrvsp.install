@@ -86,6 +86,8 @@ function lrvsp_install() {
     "get lrvsp_links"
   );
   $restrictedRestPermissions = array(
+    "get lrvsp_docfiles",
+    "get lrvsp_status",
     "post lrvsp_create"
   );
   $entities = array(

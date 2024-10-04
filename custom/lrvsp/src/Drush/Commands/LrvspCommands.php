@@ -53,7 +53,7 @@ final class LrvspCommands extends DrushCommands {
         $docId = \Drupal::entityQuery('lrvsp_doc')
           ->condition('status',1)
           ->condition('label',$res->title)
-          ->accessCheck(False) // TODO decide if this is correct
+          ->accessCheck(True)
           ->execute();
         if (empty($docId)){
           // doc doesn't exist, create new
@@ -111,7 +111,7 @@ final class LrvspCommands extends DrushCommands {
         $docId = \Drupal::entityQuery('lrvsp_doc')
           ->condition('status', 1)
           ->condition('label', $res->fromTitle)
-          ->accessCheck(False) // TODO decide if this is correct
+          ->accessCheck(True)
           ->execute();
         if (empty($docId)) {
           // doesn't exist, make new
@@ -129,7 +129,7 @@ final class LrvspCommands extends DrushCommands {
         $docId = \Drupal::entityQuery('lrvsp_doc')
           ->condition('status', 1)
           ->condition('label', $res->toTitle)
-          ->accessCheck(False) // TODO decide if this is correct
+          ->accessCheck(True)
           ->execute();
         if (empty($docId)) {
           // doesn't exist, make new
@@ -148,7 +148,7 @@ final class LrvspCommands extends DrushCommands {
           ->condition('status', 1)
           ->condition('fromDoc', $fromDocId)
           ->condition('toDoc', $toDocId)
-          ->accessCheck(False) // TODO decide if this is correct
+          ->accessCheck(True)
           ->execute();
         if (empty($linkIds)){
           // create link object if it doesn't
@@ -247,7 +247,7 @@ final class LrvspCommands extends DrushCommands {
       $docId = \Drupal::entityQuery('lrvsp_doc')
         ->condition('status', 1)
         ->condition('label', $res->fromTitle)
-        ->accessCheck(False) // TODO decide if this is correct
+        ->accessCheck(True)
         ->execute();
       // check if doc exists
       if (!empty($docId)) {

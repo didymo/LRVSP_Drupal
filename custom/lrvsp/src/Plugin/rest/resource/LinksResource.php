@@ -109,7 +109,7 @@ final class LinksResource extends ResourceBase {
     $linkIds = \Drupal::entityQuery('lrvsp_link')
       ->condition('status', 1)
       ->condition('fromDoc', $doc->id())
-      ->accessCheck(FALSE) // TODO decide if this is correct
+      ->accessCheck(True)
       ->execute();
     $links = Link::loadMultiple($linkIds);
     $linkList = array();
@@ -133,7 +133,7 @@ final class LinksResource extends ResourceBase {
     $response = new ResourceResponse($linkList);
     // set cache stuff
     $metadata = new CacheableMetadata();
-    $metadata->setCacheMaxAge(0); // TODO replace with tags
+    $metadata->addCacheTags(['lrvsp_link_list']);
     $response->addCacheableDependency($metadata);
     return $response;
   }
