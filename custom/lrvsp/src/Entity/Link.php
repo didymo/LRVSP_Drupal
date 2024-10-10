@@ -92,7 +92,7 @@ final class Link extends ContentEntityBase implements LinkInterface {
     $linkIds = \Drupal::entityQuery('lrvsp_link')
       ->condition('status', 1)
       ->condition('fromDoc', $fromDocId)
-      ->accessCheck(FALSE) // TODO decide whether this is correct
+      ->accessCheck(TRUE)
       ->execute();
     $fromDoc = Doc::load($fromDocId);
     if ($fromDoc->getNumLinks() > -1){
@@ -102,7 +102,6 @@ final class Link extends ContentEntityBase implements LinkInterface {
         $fromDoc->setLinksProcessed(); // set processed anyway
         \Drupal::logger('lrvsp')->error("To many links processed for document.\nExpected number: ".$fromDoc->getNumLinks()."\nActual number: ".sizeof($linkIds));
       }
-
     }
   }
 

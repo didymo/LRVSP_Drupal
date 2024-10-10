@@ -7,23 +7,24 @@ namespace Drupal\lrvsp\Plugin\rest\resource;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Drupal\Core\KeyValueStore\KeyValueStoreInterface;
-use Drupal\lrvsp\Entity\Doc;
+use Drupal\rest\ModifiedResourceResponse;
 use Drupal\rest\Plugin\ResourceBase;
 use Drupal\rest\ResourceResponse;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Route;
 use Drupal\Core\Session\AccountProxyInterface;
 
 /**
- * Represents docs records as resources.
+ * Represents lrvsp_docfiles records as resources.
  *
  * @RestResource (
- *   id = "lrvsp_docs",
- *   label = @Translation("[LRVSP] Get all processed docs"),
+ *   id = "lrvsp_docfiles",
+ *   label = @Translation("[LRVSP] Get all owned docfile ids"),
  *   uri_paths = {
- *     "canonical" = "/docs"
+ *     "canonical" = "/docfiles"
  *   }
  * )
  *
@@ -49,7 +50,7 @@ use Drupal\Core\Session\AccountProxyInterface;
  * Drupal core.
  * @see \Drupal\rest\Plugin\rest\resource\EntityResource
  */
-final class DocsResource extends ResourceBase {
+final class DocfilesResource extends ResourceBase {
 
   /**
    * The key-value storage.
@@ -70,7 +71,7 @@ final class DocsResource extends ResourceBase {
     AccountProxyInterface    $currentUser,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $serializer_formats, $logger);
-    $this->storage = $keyValueFactory->get('lrvsp_docs');
+    $this->storage = $keyValueFactory->get('lrvsp_docfiles');
     $this->currentUser = $currentUser;
   }
 
@@ -98,23 +99,16 @@ final class DocsResource extends ResourceBase {
       throw new AccessDeniedHttpException();
     }
 
-    $docs = Doc::loadMultiple();
-    $docList = array();
-    // extract required data
-    foreach ($docs as $doc){
-      if ($doc instanceof Doc){
-        $retDoc['id'] = $doc->id();
-        $retDoc['title'] = $doc->getTitle();
-        $retDoc['tracked'] = $doc->getIsTracked();
+    $docFileIds = \Drupal::entityQuery('lrvsp_docfile')
+      ->condition('status', 1)
+      ->condition('uid', $this->currentUser->id())
+      ->accessCheck(True)
+      ->execute();
 
-        $docList[] = $retDoc;
-        unset($retDoc);
-      }
-    }
-    // return response
-    $response = new ResourceResponse($docList);
+    $response = new ResourceResponse($docFileIds);
     $metadata = new CacheableMetadata();
-    $metadata->addCacheTags(['lrvsp_doc_list']);
+    $metadata->addCacheTags(['lrvsp_docfiles_list']);
+    $metadata->addCacheableDependency($this->currentUser);
     $response->addCacheableDependency($metadata);
     return $response;
   }

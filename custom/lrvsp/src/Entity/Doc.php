@@ -90,16 +90,18 @@ final class Doc extends ContentEntityBase implements DocInterface {
     $linkIds = \Drupal::entityQuery('lrvsp_link')
       ->condition('status', 1)
       ->condition('fromDoc', $this->id())
-      ->accessCheck(FALSE) // TODO decide whether this is correct
+      ->accessCheck(TRUE)
       ->execute();
     if ($this->getNumLinks() > -1){
       if (sizeof($linkIds) == $this->getNumLinks()){
         $this->setLinksProcessed();
       } elseif (sizeof($linkIds) > $this->getNumLinks()){
         $this->setLinksProcessed(); // set processed anyway
-        \Drupal::logger('lrvsp')->error("To many links processed for document.\nExpected number: ".$this->getNumLinks()."\nActual number: ".sizeof($linkIds));
+        \Drupal::logger('lrvsp')->error(
+          "To many links processed for document.".
+          "\nExpected number: ".$this->getNumLinks().
+          "\nActual number: ".sizeof($linkIds));
       }
-
     }
   }
 
